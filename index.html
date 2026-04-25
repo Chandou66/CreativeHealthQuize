@@ -1,0 +1,366 @@
+
+<h2 class="sr-only">Who Are You in the Game of Life? — an interactive Creative Health quiz connected to the What Are the Odds? exhibition at Ikon Gallery, Birmingham</h2>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.screen{display:none}
+.screen.active{display:block}
+
+.intro-wrap{text-align:center;padding:2.5rem 1rem 2rem}
+.intro-stripe{display:flex;gap:0;margin-bottom:2rem;border-radius:var(--border-radius-md);overflow:hidden;height:8px}
+.intro-stripe span{flex:1}
+.intro-eyebrow{font-size:11px;letter-spacing:2px;color:var(--color-text-secondary);margin-bottom:0.75rem}
+.intro-title{font-size:26px;font-weight:500;color:var(--color-text-primary);line-height:1.3;margin-bottom:0.75rem}
+.intro-sub{font-size:14px;color:var(--color-text-secondary);max-width:460px;margin:0 auto 2rem;line-height:1.7}
+.intro-meta{display:flex;justify-content:center;gap:1.5rem;margin-bottom:2rem}
+.meta-item{font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;gap:5px}
+.meta-dot{width:6px;height:6px;border-radius:50%;background:var(--color-border-primary)}
+.start-btn{display:inline-block;padding:12px 32px;background:#1D9E75;color:#E1F5EE;border:none;border-radius:var(--border-radius-md);font-size:15px;font-weight:500;cursor:pointer;letter-spacing:0.3px}
+.start-btn:hover{background:#0F6E56}
+
+.q-wrap{padding:1.5rem 0}
+.progress-bar{height:3px;background:var(--color-border-tertiary);border-radius:2px;margin-bottom:2rem;overflow:hidden}
+.progress-fill{height:100%;background:#1D9E75;border-radius:2px;transition:width 0.3s}
+.q-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.q-num{font-size:11px;letter-spacing:1.5px;color:var(--color-text-secondary)}
+.q-theme{font-size:11px;padding:3px 10px;border-radius:20px;background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.q-text{font-size:18px;font-weight:500;color:var(--color-text-primary);line-height:1.5;margin-bottom:0.5rem}
+.q-sub{font-size:13px;color:var(--color-text-secondary);margin-bottom:1.75rem;line-height:1.6;font-style:italic}
+.options{display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem}
+.opt{padding:14px 16px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;font-size:14px;color:var(--color-text-primary);line-height:1.5;background:var(--color-background-primary);transition:border-color 0.12s,background 0.12s;text-align:left}
+.opt:hover{border-color:var(--color-border-primary);background:var(--color-background-secondary)}
+.opt.selected{border:2px solid #1D9E75;background:#E1F5EE;color:#085041}
+.opt-letter{font-weight:500;margin-right:8px;color:var(--color-text-secondary);font-size:13px}
+.opt.selected .opt-letter{color:#085041}
+.nav{display:flex;justify-content:space-between;align-items:center}
+.back-btn{font-size:13px;color:var(--color-text-secondary);background:none;border:none;cursor:pointer;padding:8px 0}
+.back-btn:hover{color:var(--color-text-primary)}
+.next-btn{padding:10px 24px;background:#1D9E75;color:#E1F5EE;border:none;border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;opacity:0.4;pointer-events:none}
+.next-btn.ready{opacity:1;pointer-events:auto}
+.next-btn.ready:hover{background:#0F6E56}
+
+.result-wrap{padding:1.5rem 0 2rem}
+.result-top{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:0.5px solid var(--color-border-tertiary)}
+.result-icon{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.result-eyebrow{font-size:10px;letter-spacing:2px;color:var(--color-text-secondary);margin-bottom:4px}
+.result-name{font-size:22px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.result-tagline{font-size:13px;color:var(--color-text-secondary);font-style:italic}
+.result-body{font-size:14px;color:var(--color-text-secondary);line-height:1.75;margin-bottom:1.25rem}
+.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem}
+.artwork-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.875rem}
+.aw-title{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px}
+.aw-artist{font-size:11px;color:var(--color-text-secondary);margin-bottom:6px}
+.aw-desc{font-size:12px;color:var(--color-text-secondary);line-height:1.6}
+.visit-box{border-radius:0;padding:1rem 1rem 1rem 1.25rem;margin-bottom:1.25rem;border-left:3px solid #1D9E75}
+.visit-label{font-size:10px;letter-spacing:1.5px;color:#0F6E56;margin-bottom:4px;font-weight:500}
+.visit-text{font-size:13px;color:var(--color-text-secondary);line-height:1.7}
+.traits{display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem}
+.trait-row{display:flex;align-items:center;gap:10px}
+.trait-lbl{font-size:12px;color:var(--color-text-secondary);width:88px;flex-shrink:0}
+.trait-track{flex:1;height:5px;background:var(--color-border-tertiary);border-radius:3px;overflow:hidden}
+.trait-fill{height:100%;border-radius:3px;background:#1D9E75}
+.result-actions{display:flex;gap:10px;flex-wrap:wrap}
+.action-primary{padding:10px 22px;background:#1D9E75;color:#E1F5EE;border:none;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer}
+.action-primary:hover{background:#0F6E56}
+.action-secondary{padding:10px 22px;background:transparent;color:var(--color-text-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:13px;cursor:pointer}
+.action-secondary:hover{background:var(--color-background-secondary)}
+
+.stripe-bar{display:flex;height:5px;border-radius:3px;overflow:hidden;margin-bottom:1.5rem;gap:2px}
+.stripe-bar span{flex:1;border-radius:2px}
+</style>
+
+<div id="s-intro" class="screen active intro-wrap">
+  <div class="intro-stripe">
+    <span style="background:#F5C842"></span>
+    <span style="background:#E8821A"></span>
+    <span style="background:#E8457A"></span>
+    <span style="background:#2BBCD4"></span>
+    <span style="background:#1A8C5A"></span>
+    <span style="background:#2B5FA0"></span>
+  </div>
+  <div class="intro-eyebrow">IKON CREATIVE HEALTH · WHAT ARE THE ODDS?</div>
+  <div class="intro-title">Who are you in the<br>game of life?</div>
+  <div class="intro-sub">A short quiz connecting your experience of health and care to the artworks on display at the Library of Birmingham. Discover your Creative Health persona — and find your place in the exhibition.</div>
+  <div class="intro-meta">
+    <div class="meta-item"><div class="meta-dot"></div>8 questions</div>
+    <div class="meta-item"><div class="meta-dot"></div>3–4 minutes</div>
+    <div class="meta-item"><div class="meta-dot"></div>6 personas</div>
+  </div>
+  <button class="start-btn" onclick="startQuiz()">Begin the quiz</button>
+</div>
+
+<div id="s-quiz" class="screen q-wrap">
+  <div class="progress-bar"><div class="progress-fill" id="pbar" style="width:0%"></div></div>
+  <div class="q-meta">
+    <span class="q-num" id="q-num">Question 1 of 8</span>
+    <span class="q-theme" id="q-theme"></span>
+  </div>
+  <div class="q-text" id="q-text"></div>
+  <div class="q-sub" id="q-sub"></div>
+  <div class="options" id="options"></div>
+  <div class="nav">
+    <button class="back-btn" id="back-btn" onclick="goBack()">← Back</button>
+    <button class="next-btn" id="next-btn" onclick="goNext()">Next →</button>
+  </div>
+</div>
+
+<div id="s-result" class="screen result-wrap">
+  <div class="stripe-bar" id="result-stripe">
+    <span style="background:#F5C842"></span>
+    <span style="background:#E8821A"></span>
+    <span style="background:#E8457A"></span>
+    <span style="background:#2BBCD4"></span>
+    <span style="background:#1A8C5A"></span>
+    <span style="background:#2B5FA0"></span>
+  </div>
+  <div class="result-top">
+    <div class="result-icon" id="r-icon"></div>
+    <div>
+      <div class="result-eyebrow">YOUR CREATIVE HEALTH PERSONA</div>
+      <div class="result-name" id="r-name"></div>
+      <div class="result-tagline" id="r-tagline"></div>
+    </div>
+  </div>
+  <div class="result-body" id="r-body"></div>
+  <div class="traits" id="r-traits"></div>
+  <div class="result-grid" id="r-artworks"></div>
+  <div class="visit-box" id="r-visit" style="background:var(--color-background-secondary)">
+    <div class="visit-label">YOUR VISIT PROMPT</div>
+    <div class="visit-text" id="r-visit-text"></div>
+  </div>
+  <div class="result-actions">
+    <button class="action-primary" onclick="sendPrompt('Tell me more about my Creative Health persona and the exhibition artworks connected to it')">Explore further ↗</button>
+    <button class="action-secondary" onclick="retake()">Retake the quiz</button>
+  </div>
+</div>
+
+<script>
+const PERSONAS = {
+  nurturer:{name:"The Nurturer",tagline:"You give before you ask. Care is your language.",color:"#1D9E75",bg:"#E1F5EE",tc:"#085041",
+    desc:"You instinctively move toward others in need — holding space without being asked, feeding without fanfare, finding meaning in the quiet acts of sustaining life. But who sustains you? This exhibition invites you to sit with that question.",
+    traits:[{l:"Empathy",v:92},{l:"Patience",v:80},{l:"Advocacy",v:60},{l:"Self-care",v:32}],
+    artworks:[
+      {t:"Feeding Chair",a:"Joanne Masding, Amelia Hawk & Ania Bas, 2022–ongoing",d:"An evolving installation exploring the intimacy and politics of infant feeding — the chair as a site of labour, love, and contested social norms."},
+      {t:"Milk & Blankets",a:"Joanne Masding, Amelia Hawk & Ania Bas, 2025",d:"New work holding the warmth and vulnerability of early nourishment, and all that goes unspoken in the act of feeding another."}
+    ],
+    visit:"Find Feeding Chair and sit in it — literally. Notice what your body does. Stay for two minutes."
+  },
+  witness:{name:"The Witness",tagline:"You see what others overlook. Visibility is power.",color:"#D85A30",bg:"#FAECE7",tc:"#712B13",
+    desc:"You notice the person at the edges of the room. You document, remember, and refuse to let things go unseen. The systems that make people invisible frustrate you — because you know that being seen is the first step to being helped.",
+    traits:[{l:"Observation",v:95},{l:"Justice",v:86},{l:"Courage",v:70},{l:"Rest",v:28}],
+    artworks:[
+      {t:"Why Are We Stuck in Hospital?",a:"Foka Wolf, 2023",d:"A data visualisation and graphic design work exposing the invisibility of people with learning disabilities in long-stay hospitals — turned into public billboards across Birmingham."},
+      {t:"(Re)Coded",a:"Vic Moyosola & Sadie Barnett, 2024",d:"Photography that breaks down barriers and advocates for health justice in dialogue with communities across Birmingham."}
+    ],
+    visit:"Stand in front of Foka Wolf's maze. Count how many people you know who are stuck in a system right now. Stay with that number."
+  },
+  navigator:{name:"The Navigator",tagline:"You find the path when there isn't one.",color:"#7F77DD",bg:"#EEEDFE",tc:"#3C3489",
+    desc:"You've learned to read systems — how to ask the right question, find the back door, translate bureaucratic language for the people you love. This skill came at a cost. But you carry it anyway, because someone has to.",
+    traits:[{l:"Resourcefulness",v:88},{l:"Persistence",v:82},{l:"Systems thinking",v:76},{l:"Vulnerability",v:38}],
+    artworks:[
+      {t:"Leave A Light In My Room",a:"Ayesha Jones, 2023",d:"A photographic series exploring care, presence, and the emotional geography of domestic health spaces — the rooms we recover in, and the people who keep the light on."},
+      {t:"Green Spaces",a:"Jaskirt Dhaliwal-Boora, 2024",d:"Photography exploring green public spaces as sites of community health and psychological restoration — places that help us find our way back to ourselves."}
+    ],
+    visit:"Sit on the Green Spaces seating installation. Think about a place — real or remembered — where you have felt guided rather than lost."
+  },
+  advocate:{name:"The Advocate",tagline:"You speak when others cannot.",color:"#BA7517",bg:"#FAEEDA",tc:"#633806",
+    desc:"You've learned that silence is a choice — and you choose noise. Whether it's a policy, a practice, or a person who isn't being heard, you find your way into the conversation. Sometimes loudly. Sometimes at a cost. Always with purpose.",
+    traits:[{l:"Voice",v:93},{l:"Conviction",v:86},{l:"Community",v:78},{l:"Self-preservation",v:35}],
+    artworks:[
+      {t:"(Re)Coded",a:"Vic Moyosola & Sadie Barnett, 2024",d:"A photographic advocacy project using community portraiture to challenge health inequalities and give visibility to those whose voices are systematically diminished."},
+      {t:"Green Spaces",a:"Jaskirt Dhaliwal-Boora, 2024",d:"Public green space as a health right — a quiet argument for what every community deserves access to, and who gets to decide."}
+    ],
+    visit:"Find the (Re)Coded portraits. Choose one face. Stay with it for two minutes. Ask: what did this person have to fight for that they should never have needed to?"
+  },
+  seeker:{name:"The Seeker",tagline:"You are still figuring out what your body means.",color:"#D4537E",bg:"#FBEAF0",tc:"#72243E",
+    desc:"Something about your relationship with your body — or with the health systems that have tried to define it — remains unresolved. You are in the middle of a question, not at the end of an answer. This exhibition was made for you.",
+    traits:[{l:"Curiosity",v:88},{l:"Openness",v:80},{l:"Reflection",v:72},{l:"Certainty",v:22}],
+    artworks:[
+      {t:"Visible Bodies",a:"Sally Butcher, 2024",d:"Performative text pieces exploring alternative meanings around the reproductive body in relation to infertility — language as resistance against medical definitions of what bodies should do."},
+      {t:"Feeding Chair",a:"Joanne Masding, Amelia Hawk & Ania Bas, 2022–ongoing",d:"A site of contested norms around the fed body — who decides, who judges, and what it means to nourish."}
+    ],
+    visit:"Read Sally Butcher's text pieces slowly. Find one word that surprises you. Photograph it or write it down. Carry it with you."
+  },
+  keeper:{name:"The Keeper of Time",tagline:"You know what it means to wait.",color:"#378ADD",bg:"#E6F1FB",tc:"#0C447C",
+    desc:"You have sat in waiting rooms — literal and metaphorical. You understand that time moves differently inside institutions. That a day can feel like a year. That light matters. That rhythm matters. That the body remembers being contained.",
+    traits:[{l:"Patience",v:90},{l:"Depth",v:84},{l:"Awareness",v:80},{l:"Freedom",v:28}],
+    artworks:[
+      {t:"Waiting for the Fold",a:"Niki Gandy, 2025",d:"Made during a residency at HMP Birmingham, this work explores light deprivation and disrupted Circadian rhythms under incarceration — collaboratively made with prisoners."},
+      {t:"Green Spaces",a:"Jaskirt Dhaliwal-Boora, 2024",d:"The outside world — its light, its green, its openness — as both absence and aspiration for those kept from it."}
+    ],
+    visit:"Look at Waiting for the Fold and notice the light in the work. Then go to a window in the Library of Birmingham. Stand in the actual light for a moment."
+  }
+};
+
+const QUESTIONS = [
+  {
+    text:"When someone you care about is unwell, what is your instinct?",
+    sub:"Think of a real moment — not what you think you should do, but what you actually do.",
+    theme:"Care & instinct",
+    options:[
+      {text:"I show up. I cook, I drive, I sit with them.",scores:{nurturer:3,navigator:1}},
+      {text:"I start researching — doctors, services, whatever they might need.",scores:{navigator:3,advocate:1}},
+      {text:"I watch carefully and try to understand what they actually need.",scores:{witness:3,seeker:1}},
+      {text:"I struggle to know what to do, but I feel it deeply.",scores:{seeker:3,keeper:1}}
+    ]
+  },
+  {
+    text:"Have you ever felt invisible inside a health or care system?",
+    sub:"This might be your own experience, or watching someone else navigate it.",
+    theme:"Visibility & systems",
+    options:[
+      {text:"Yes — and it made me angry enough to do something about it.",scores:{witness:3,advocate:2}},
+      {text:"Yes — so I learned to speak louder and push harder.",scores:{advocate:3,navigator:1}},
+      {text:"Yes — I found workarounds, but the exhaustion stayed with me.",scores:{navigator:3,keeper:1}},
+      {text:"I've felt more confused than invisible — like I couldn't read the room.",scores:{seeker:3,keeper:1}}
+    ]
+  },
+  {
+    text:"What does a green space mean to you?",
+    sub:"A park, a garden, a field — any place outside.",
+    theme:"Space & wellbeing",
+    options:[
+      {text:"Somewhere to breathe when everything inside feels too heavy.",scores:{keeper:3,seeker:2}},
+      {text:"A place everyone should have access to — not just the lucky ones.",scores:{advocate:3,witness:1}},
+      {text:"Somewhere I take the people I love when they need to recover.",scores:{nurturer:3,navigator:1}},
+      {text:"A place where I can think without being watched or judged.",scores:{seeker:3,witness:1}}
+    ]
+  },
+  {
+    text:"When you think about the invisible labour of caring — feeding, watching, waiting — what feeling comes up?",
+    sub:"There is no right answer here.",
+    theme:"Care labour",
+    options:[
+      {text:"Recognition — I have done this, often without anyone noticing.",scores:{nurturer:3,keeper:1}},
+      {text:"Injustice — this labour is undervalued and falls on the wrong people.",scores:{advocate:3,witness:2}},
+      {text:"Grief — I have watched someone give and give until there was nothing left.",scores:{keeper:3,seeker:1}},
+      {text:"Gratitude — someone did this for me, and I am still carrying it.",scores:{seeker:2,nurturer:2}}
+    ]
+  },
+  {
+    text:"Have you ever had to translate an experience to someone who couldn't understand it?",
+    sub:"A health situation, a need, a feeling — something that didn't have easy language.",
+    theme:"Language & understanding",
+    options:[
+      {text:"Constantly. I've spent years explaining myself to systems that weren't designed for me.",scores:{seeker:3,witness:2}},
+      {text:"Yes — especially when navigating healthcare for someone I love.",scores:{navigator:3,nurturer:1}},
+      {text:"Yes — and I've made it my purpose to make that translation easier for others.",scores:{advocate:3,witness:1}},
+      {text:"I often feel the translation goes the other way — I struggle to understand what's happening to me.",scores:{keeper:3,seeker:2}}
+    ]
+  },
+  {
+    text:"What is your relationship with waiting?",
+    sub:"In hospitals, in queues, for results, for change.",
+    theme:"Time & institution",
+    options:[
+      {text:"I have learned patience I never wanted to learn.",scores:{keeper:3,nurturer:1}},
+      {text:"I find ways around it — I research, I escalate, I refuse to just sit there.",scores:{navigator:3,advocate:1}},
+      {text:"Waiting makes me notice things — the people around me, the systems, the unfairness.",scores:{witness:3,keeper:1}},
+      {text:"Waiting is where my uncertainty lives. Time feels different when you don't know.",scores:{seeker:3,keeper:2}}
+    ]
+  },
+  {
+    text:"When you think about your body, how would you describe your relationship with it?",
+    sub:"Not how you think it looks — how it feels to live inside it.",
+    theme:"Body & identity",
+    options:[
+      {text:"It is a tool I use to care for others. It matters less than the people I love.",scores:{nurturer:3,keeper:1}},
+      {text:"It has been defined by others — doctors, systems, culture — in ways I'm still undoing.",scores:{seeker:3,witness:2}},
+      {text:"It carries what I've witnessed. Sometimes more than I want it to.",scores:{witness:3,keeper:2}},
+      {text:"It is where I keep what I can't say out loud.",scores:{keeper:3,seeker:2}}
+    ]
+  },
+  {
+    text:"If you could change one thing about how health and care work in this country, what would it be?",
+    sub:"Think big — or think specific. Both are valid.",
+    theme:"Change & vision",
+    options:[
+      {text:"That no one has to navigate it alone.",scores:{nurturer:3,navigator:2}},
+      {text:"That invisible people are finally seen — and counted.",scores:{witness:3,advocate:2}},
+      {text:"That those who speak up don't pay a price for it.",scores:{advocate:3,seeker:1}},
+      {text:"That time — the waiting, the limbo — is treated as the harm it actually is.",scores:{keeper:3,navigator:1}}
+    ]
+  }
+];
+
+let current = 0;
+let answers = [];
+let scores = {nurturer:0,witness:0,navigator:0,advocate:0,seeker:0,keeper:0};
+
+function startQuiz(){
+  show('s-quiz');
+  renderQ();
+}
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function renderQ(){
+  const q = QUESTIONS[current];
+  const pct = Math.round((current/QUESTIONS.length)*100);
+  document.getElementById('pbar').style.width = pct+'%';
+  document.getElementById('q-num').textContent = 'Question '+(current+1)+' of '+QUESTIONS.length;
+  document.getElementById('q-theme').textContent = q.theme;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('q-sub').textContent = q.sub;
+  const letters = ['A','B','C','D'];
+  document.getElementById('options').innerHTML = q.options.map((o,i)=>
+    `<button class="opt${answers[current]===i?' selected':''}" onclick="select(${i})">
+      <span class="opt-letter">${letters[i]}</span>${o.text}
+    </button>`
+  ).join('');
+  document.getElementById('back-btn').style.visibility = current===0?'hidden':'visible';
+  const nb = document.getElementById('next-btn');
+  nb.textContent = current===QUESTIONS.length-1?'See my result →':'Next →';
+  nb.classList.toggle('ready', answers[current]!==undefined);
+}
+function select(i){
+  answers[current] = i;
+  document.querySelectorAll('.opt').forEach((o,idx)=>o.classList.toggle('selected',idx===i));
+  document.getElementById('next-btn').classList.add('ready');
+}
+function goNext(){
+  if(answers[current]===undefined) return;
+  const q = QUESTIONS[current];
+  const chosen = q.options[answers[current]];
+  Object.entries(chosen.scores).forEach(([k,v])=>scores[k]+=v);
+  if(current<QUESTIONS.length-1){current++;renderQ();}
+  else showResult();
+}
+function goBack(){
+  if(current===0) return;
+  const q = QUESTIONS[current-1];
+  const prev = answers[current-1];
+  if(prev!==undefined){
+    const chosen = q.options[prev];
+    Object.entries(chosen.scores).forEach(([k,v])=>scores[k]-=v);
+  }
+  current--;renderQ();
+}
+function showResult(){
+  const top = Object.entries(scores).sort((a,b)=>b[1]-a[1])[0][0];
+  const p = PERSONAS[top];
+  document.getElementById('r-icon').style.background = p.bg;
+  document.getElementById('r-icon').innerHTML = `<svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="14" r="7" fill="${p.color}"/><path d="M4 32c0-7.7 6.3-14 14-14s14 6.3 14 14" fill="${p.color}"/></svg>`;
+  document.getElementById('r-name').textContent = p.name;
+  document.getElementById('r-name').style.color = p.color;
+  document.getElementById('r-tagline').textContent = p.tagline;
+  document.getElementById('r-body').textContent = p.desc;
+  document.getElementById('r-traits').innerHTML = p.traits.map(t=>
+    `<div class="trait-row"><span class="trait-lbl">${t.l}</span><div class="trait-track"><div class="trait-fill" style="width:${t.v}%;background:${p.color}"></div></div></div>`
+  ).join('');
+  document.getElementById('r-artworks').innerHTML = p.artworks.map(a=>
+    `<div class="artwork-card"><div class="aw-title">${a.t}</div><div class="aw-artist">${a.a}</div><div class="aw-desc">${a.d}</div></div>`
+  ).join('');
+  document.getElementById('r-visit').style.borderLeftColor = p.color;
+  document.getElementById('r-visit').style.background = p.bg;
+  document.getElementById('r-visit-text').style.color = p.tc;
+  document.getElementById('r-visit-text').textContent = p.visit;
+  show('s-result');
+}
+function retake(){
+  current=0;answers=[];
+  scores={nurturer:0,witness:0,navigator:0,advocate:0,seeker:0,keeper:0};
+  show('s-quiz');renderQ();
+}
+</script>
